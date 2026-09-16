@@ -1,11 +1,40 @@
 import os
 import math
 import secrets
+import ctypes
 import urllib.parse
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+
+
+# --- PRELOAD libexpat (dibutuhkan GDAL/rasterio di runtime serverless) ---
+# Runtime Python Vercel tidak menyertakan libexpat.so.1. Kita bundel versi
+# manylinux di folder vendor/ dan memuatnya lebih dulu dengan RTLD_GLOBAL
+# agar simbolnya dapat dipakai oleh extension rasterio/GDAL saat diimpor.
+def _preload_libexpat():
+    here = os.path.dirname(os.path.abspath(__file__))
+    mode = getattr(ctypes, "RTLD_GLOBAL", 0)
+    for folder in (os.path.join(here, "vendor"), here):
+        candidate = os.path.join(folder, "libexpat.so.1")
+        if os.path.exists(candidate):
+            try:
+                ctypes.CDLL(candidate, mode=mode)
+                return
+            except Exception as e:
+                print(f"WARN: gagal memuat {candidate}: {e}")
+
+
+_preload_libexpat()
+
+# GDAL: jangan "list directory" di server HF dan batasi extension yang boleh
+# dibuka lewat /vsicurl/, supaya hanya byte yang perlu yang diunduh.
+os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
+os.environ.setdefault("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", ".tif,.tiff")
+os.environ.setdefault("VSI_CACHE", "TRUE")
+os.environ.setdefault("GDAL_HTTP_MERGE_CONSECUTIVE_RANGES", "YES")
+
 import rasterio
 from rasterio.windows import Window
 from pyproj import Transformer
@@ -34,13 +63,6 @@ EXTRACT_DIR = os.environ.get("HF_EXTRACT_DIR", os.path.join(BASE_DIR, "data_geot
 # /api/process-location wajib menyertakan header X-API-Key yang sama.
 # Biarkan kosong untuk menonaktifkan (mis. saat pengujian lokal).
 API_KEY = os.environ.get("INARISK_API_KEY", "").strip()
-
-# GDAL: jangan "list directory" di server HF dan batasi extension yang boleh
-# dibuka lewat /vsicurl/, supaya hanya byte yang perlu yang diunduh.
-os.environ.setdefault("GDAL_DISABLE_READDIR_ON_OPEN", "EMPTY_DIR")
-os.environ.setdefault("CPL_VSIL_CURL_ALLOWED_EXTENSIONS", ".tif,.tiff")
-os.environ.setdefault("VSI_CACHE", "TRUE")
-os.environ.setdefault("GDAL_HTTP_MERGE_CONSECUTIVE_RANGES", "YES")
 
 # Folder lokal sebagai cadangan jika data_geotiff kosong (HF belum tersedia)
 LOCAL_FALLBACK = {
