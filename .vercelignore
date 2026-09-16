@@ -21,4 +21,6 @@ Kode.gs
 
 # Lain-lain
 .env
+.env*
+.vercel
 DockerFile
