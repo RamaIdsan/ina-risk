@@ -1,0 +1,24 @@
+# Cegah upload artefak berat bila deploy via Vercel CLI.
+venv/
+__pycache__/
+*.pyc
+
+# Data GeoTIFF lokal (data asli ada di Hugging Face; mode vsicurl tidak butuh ini)
+data_geotiff/
+Banjirfix/
+gelmobang dan abrasi/
+letusan duar/
+tanah longsor fix/
+tsunami/
+*.tif
+*.tiff
+*.aux.xml
+*.zip
+
+# Frontend Google Apps Script (bukan bagian backend Vercel)
+Index.html
+Kode.gs
+
+# Lain-lain
+.env
+DockerFile
