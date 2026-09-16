@@ -3,3 +3,4 @@ uvicorn
 pydantic
 rasterio
 pyproj
+huggingface_hub
