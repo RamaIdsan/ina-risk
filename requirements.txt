@@ -1,6 +1,5 @@
-fastapi
-uvicorn
-pydantic
-rasterio
-pyproj
-huggingface_hub
+fastapi==0.141.1
+uvicorn==0.53.0
+rasterio==1.5.1
+pyproj==3.8.0
+huggingface_hub==1.31.0

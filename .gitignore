@@ -1,7 +1,9 @@
 venv/
 __pycache__/
+*.pyc
 data_geotiff/
 *.tif
 *.tiff
+*.aux.xml
 *.zip
 .env

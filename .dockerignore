@@ -1,0 +1,21 @@
+# Hindari menyalin file/data berat ke dalam image
+.git/
+.gitignore
+venv/
+__pycache__/
+*.pyc
+
+# Data GeoTIFF besar (diunduh dari Hugging Face saat runtime)
+*.tif
+*.tiff
+*.zip
+data_geotiff/
+Banjirfix/
+gelmobang dan abrasi/
+letusan duar/
+tanah longsor fix/
+tsunami/
+
+# File lain
+DockerFile
+.dockerignore

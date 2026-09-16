@@ -1,20 +1,17 @@
-FROM python:3.10-slim
+FROM python:3.13-slim
 
-# Install dependency sistem untuk GDAL/Rasterio
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gdal-bin \
-    libgdal-dev \
-    && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 WORKDIR /code
 
-# Copy file requirements dan install
+# Copy file requirements dan install (wheel rasterio/gdal sudah prebuilt)
 COPY ./requirements.txt /code/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-# Copy seluruh isi folder project ke dalam container
+# Copy project (file berat dikecualikan via .dockerignore)
 COPY . /code
 
 # Jalankan Uvicorn di port 7860 (Port default Hugging Face)
+EXPOSE 7860
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
