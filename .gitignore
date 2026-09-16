@@ -7,3 +7,6 @@ data_geotiff/
 *.aux.xml
 *.zip
 .env
+
+.vercel
+.env*
